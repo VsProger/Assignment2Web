@@ -69,7 +69,7 @@ function fetchCityImage(city) {
                 const imageUrl = data.results[0].urls.regular;
                 document.getElementById('city-image').src = imageUrl;
             } else {
-                // If no image is found, you can display a placeholder image or a message.
+                // If no image is found, display a placeholder image or a message.
                 document.getElementById('city-image').src = 'placeholder-image.jpg';
             }
         })
