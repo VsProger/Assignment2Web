@@ -1,4 +1,4 @@
-# City Information Web Application
+# Weather Web Application
 
 This web application allows you to get information about a city, including its weather, location on a map, city image, and additional information from Wikipedia.
 
