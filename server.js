@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 const app = express();
 const port = 3000;
 
-app.use(express.static('public')); // Serve static files
+app.use(express.static('public')); 
 
 app.get('/weather', (req, res) => {
     const city = req.query.city;
@@ -19,6 +19,27 @@ app.get('/weather', (req, res) => {
             console.error('Error:', error);
             res.status(500).json({ error: 'An error occurred' });
         });
+});
+
+app.get('/unsplash', async (req, res) => {
+    try {
+        const city = req.query.city; 
+        const unsplashApiKey = 's34N4BqNHsbN1siOAh3w_myyANAhF824GZAr4NGWNig';
+        const unsplashUrl = `https://api.unsplash.com/search/photos?page=1&query=${encodeURIComponent(city)}&client_id=${unsplashApiKey}`;
+
+        const response = await fetch(unsplashUrl);
+        const data = await response.json();
+
+        if (data.results.length > 0) {
+            const imageUrl = data.results[0].urls.regular;
+            res.json({ imageUrl });
+        } else {
+            res.status(404).json({ error: 'Image not found' });
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 app.listen(port, () => {

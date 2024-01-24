@@ -16,7 +16,7 @@ document.getElementById('weather-form').addEventListener('submit', function(e) {
         .then(data => {
             const display = document.getElementById('weather-data');
             if(data.main) {
-                display.innerHTML = `Temperature in ${city}: ${data.main.temp}°C`;
+                fetchWeatherData(city);
                 updateMapForCity(city);
                 getWikipediaInfo(city);
             } else {
@@ -27,6 +27,60 @@ document.getElementById('weather-form').addEventListener('submit', function(e) {
             console.error('Error:', error);
         });
 });
+
+
+
+
+function fetchWeatherData(city) {
+    const apiKey = 'e3922e2135e031401dd622353423d5ab';
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            const weatherData = {
+                temperature: `${data.main.temp}°C`,
+                description: data.weather[0].description,
+                iconUrl: `https://openweathermap.org/img/wn/${data.weather[0].icon}.png`,
+                coordinates: `[${data.coord.lat}, ${data.coord.lon}]`,
+                feelsLike: `${data.main.feels_like}°C`,
+                humidity: `${data.main.humidity}%`,
+                pressure: `${data.main.pressure} hPa`,
+                windSpeed: `${data.wind.speed} m/s`,
+                countryCode: data.sys.country,
+                rainVolume: `${data.rain ? data.rain['1h'] || 0 : 0} mm (last 1 hour)`
+            };
+
+            displayWeatherData(weatherData);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            displayErrorMessage('City not found. Please try again.');
+        });
+}
+
+function displayWeatherData(data) {
+    const weatherDataContainer = document.getElementById('weather-data');
+    weatherDataContainer.innerHTML = `
+        <h2>Weather in ${document.getElementById('city-input').value}</h2>
+        <p><strong>Temperature:</strong> ${data.temperature}</p>
+        <p><strong>Description:</strong> ${data.description}</p>
+        <img src="${data.iconUrl}" alt="Weather Icon">
+        <p><strong>Coordinates:</strong> ${data.coordinates}</p>
+        <p><strong>Feels Like:</strong> ${data.feelsLike}</p>
+        <p><strong>Humidity:</strong> ${data.humidity}</p>
+        <p><strong>Pressure:</strong> ${data.pressure}</p>
+        <p><strong>Wind Speed:</strong> ${data.windSpeed}</p>
+        <p><strong>Country Code:</strong> ${data.countryCode}</p>
+        <p><strong>Rain Volume:</strong> ${data.rainVolume}</p>
+    `;
+}
+
+function displayErrorMessage(message) {
+    const weatherDataContainer = document.getElementById('weather-data');
+    weatherDataContainer.innerHTML = `<p>${message}</p>`;
+}
+
 
 function updateMapForCity(city) {
     fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(city)}&key=AIzaSyB5Y_9cS7nUe_FSno453xY5I5Tg0ubpG2M`)
@@ -58,20 +112,16 @@ function getWikipediaInfo(city) {
 
 
 function fetchCityImage(city) {
-    const clientId = 's34N4BqNHsbN1siOAh3w_myyANAhF824GZAr4NGWNig';
-
-    const url = `https://api.unsplash.com/search/photos?page=1&query=${encodeURIComponent(city)}&client_id=${clientId}`;
-
-    fetch(url)
+    fetch(`/unsplash?city=${city}`)
         .then(response => response.json())
         .then(data => {
-            if (data.results.length > 0) {
-                const imageUrl = data.results[0].urls.regular;
-                document.getElementById('city-image').src = imageUrl;
+            if (data.imageUrl) {
+                document.getElementById('city-image').src = data.imageUrl;
             } else {
-                // If no image is found, display a placeholder image or a message.
+                
                 document.getElementById('city-image').src = 'placeholder-image.jpg';
             }
         })
         .catch(error => console.error('Error:', error));
 }
+
